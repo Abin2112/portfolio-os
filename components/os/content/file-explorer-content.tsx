@@ -472,7 +472,7 @@ export const FileExplorerContent = memo(function FileExplorerContent() {
               ? `"${items.find((i) => i.id === selectedFile)?.name}" selected`
               : `${items.length} item${items.length !== 1 ? 's' : ''}`}
           </span>
-          <span className="text-muted-foreground/60">/home/{breadcrumbs.slice(1).map(b => b.label).join('/')}</span>
+          <span className="text-muted-foreground/60">/home/{breadcrumbs.slice(1).map((b) => b.label).join('/')}</span>
         </div>
       </div>
     </div>

@@ -194,7 +194,7 @@ export function ChatbotPanel() {
                   </div>
                   <div>
                     <span className="font-medium text-foreground text-sm">Portfolio Assistant</span>
-                    <p className="text-[10px] text-muted-foreground">Asks about Abin · Opens windows</p>
+                    <p className="text-[10px] text-muted-foreground">Ask about Abin · Opens windows</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
