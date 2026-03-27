@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, memo } from 'react'
 import { DesktopIcon } from './desktop-icon'
 import { Window } from './window'
 import { Taskbar } from './taskbar'
@@ -21,6 +21,7 @@ import { ResumeContent } from './content/resume-content'
 import { FileExplorerContent } from './content/file-explorer-content'
 import { SettingsContent } from './content/settings-content'
 import { CertificatesContent } from './content/certificates-content'
+import { TerminalContent } from './content/terminal-content'
 
 const desktopIcons: { id: WindowId; label: string }[] = [
   { id: 'file-explorer', label: 'Files' },
@@ -32,6 +33,7 @@ const desktopIcons: { id: WindowId; label: string }[] = [
   { id: 'resume', label: 'Resume' },
   { id: 'contact', label: 'Contact' },
   { id: 'settings', label: 'Settings' },
+  { id: 'terminal', label: 'Terminal' },
 ]
 
 const windowTitles: Record<WindowId, string> = {
@@ -41,9 +43,9 @@ const windowTitles: Record<WindowId, string> = {
   experience: 'Experience',
   resume: 'Resume',
   contact: 'Contact',
-  'file-explorer': 'Files',
+  'file-explorer': 'Files — /home/abin',
   settings: 'Settings',
-  terminal: 'Terminal',
+  terminal: 'Terminal — abin@portfolio',
   certificates: 'Certificates',
 }
 
@@ -60,30 +62,18 @@ const windowContent: Record<WindowId, React.ReactNode> = {
   certificates: <CertificatesContent />,
 }
 
-function TerminalContent() {
-  return (
-    <div className="font-mono text-sm text-green-400 space-y-1">
-      <p>abin@portfolio:~$ whoami</p>
-      <p className="text-foreground">Abin Pillai - Data Science & Backend Developer</p>
-      <p className="mt-2">abin@portfolio:~$ cat skills.txt</p>
-      <p className="text-foreground">Python, JavaScript, TypeScript, Rust, SQL</p>
-      <p className="text-foreground">Pandas, NumPy, Scikit-learn, TensorFlow</p>
-      <p className="text-foreground">Node.js, FastAPI, Express, PostgreSQL</p>
-      <p className="mt-2">abin@portfolio:~$ <span className="animate-pulse">_</span></p>
-    </div>
-  )
-}
+const MemoizedDesktopIcon = memo(function MemoizedDesktopIcon({ id, label }: { id: WindowId; label: string }) {
+  return <DesktopIcon id={id} label={label} />
+})
 
 export function Desktop() {
   const { windows, selectIcon } = useWindowStore()
   const { isBooted, isLoggedIn, theme, accentColor, closeContextMenu } = useOSStore()
 
-  // Apply theme and accent color on mount and when they change
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const root = document.documentElement
-      
-      // Apply theme
+
       const themeVars = themeMap[theme]
       Object.entries(themeVars).forEach(([key, value]) => {
         root.style.setProperty(key, value)
@@ -91,7 +81,6 @@ export function Desktop() {
       root.classList.toggle('dark', theme === 'dark')
       root.classList.toggle('light', theme === 'light')
 
-      // Apply accent color
       const colors = accentColorMap[accentColor]
       root.style.setProperty('--primary', colors.primary)
       root.style.setProperty('--ring', colors.ring)
@@ -105,35 +94,31 @@ export function Desktop() {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
-    // Could add desktop context menu here
   }
 
   return (
     <>
-      {/* Boot Screen */}
       <BootScreen />
-
-      {/* Login Screen */}
       {isBooted && !isLoggedIn && <LoginScreen />}
 
-      {/* Main Desktop */}
       {isBooted && isLoggedIn && (
         <div
           className="relative min-h-screen overflow-hidden"
           onClick={handleDesktopClick}
           onContextMenu={handleContextMenu}
         >
-          {/* Background gradient - adapts to theme */}
-          <div 
+          {/* Background gradient */}
+          <div
             className="fixed inset-0 transition-colors duration-500"
             style={{
-              background: theme === 'dark' 
-                ? 'linear-gradient(135deg, oklch(0.12 0.04 260), oklch(0.15 0.03 250), oklch(0.1 0.05 280))'
-                : 'linear-gradient(135deg, oklch(0.95 0.02 260), oklch(0.97 0.01 250), oklch(0.93 0.02 280))'
+              background:
+                theme === 'dark'
+                  ? 'linear-gradient(135deg, oklch(0.12 0.04 260), oklch(0.15 0.03 250), oklch(0.1 0.05 280))'
+                  : 'linear-gradient(135deg, oklch(0.95 0.02 260), oklch(0.97 0.01 250), oklch(0.93 0.02 280))',
             }}
           />
 
-          {/* Subtle pattern overlay */}
+          {/* Subtle dot pattern */}
           <div
             className="fixed inset-0 transition-opacity duration-500"
             style={{
@@ -147,7 +132,6 @@ export function Desktop() {
           <div className="fixed top-0 left-1/4 w-96 h-96 bg-primary/15 rounded-full blur-[128px] pointer-events-none transition-colors duration-500" />
           <div className="fixed bottom-1/4 right-1/4 w-64 h-64 bg-accent/10 rounded-full blur-[100px] pointer-events-none transition-colors duration-500" />
 
-          {/* Top Bar */}
           <TopBar />
 
           {/* Desktop icons grid */}
@@ -166,7 +150,7 @@ export function Desktop() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 + 0.4 }}
                 >
-                  <DesktopIcon id={icon.id} label={icon.label} />
+                  <MemoizedDesktopIcon id={icon.id} label={icon.label} />
                 </motion.div>
               ))}
             </div>
@@ -175,9 +159,9 @@ export function Desktop() {
           {/* Windows */}
           <AnimatePresence>
             {Object.entries(windows).map(
-              ([id, window]) =>
-                window.isOpen &&
-                !window.isMinimized && (
+              ([id, win]) =>
+                win.isOpen &&
+                !win.isMinimized && (
                   <Window key={id} id={id as WindowId} title={windowTitles[id as WindowId]}>
                     {windowContent[id as WindowId]}
                   </Window>
@@ -185,16 +169,9 @@ export function Desktop() {
             )}
           </AnimatePresence>
 
-          {/* Taskbar */}
           <Taskbar />
-
-          {/* Notification Panel */}
           <NotificationPanel />
-
-          {/* Chatbot Panel */}
           <ChatbotPanel />
-
-          {/* Context Menu */}
           <ContextMenu />
         </div>
       )}

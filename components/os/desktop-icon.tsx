@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useWindowStore, type WindowId } from '@/lib/window-store'
 import { useOSStore } from '@/lib/os-store'
 import { useNotificationStore } from '@/lib/notification-store'
+import { playClickSound } from '@/lib/sound-utils'
 import {
   User,
   FolderKanban,
@@ -50,12 +51,13 @@ const iconColors: Record<WindowId, string> = {
 
 export function DesktopIcon({ id, label }: DesktopIconProps) {
   const { openWindow, selectedIcon, selectIcon } = useWindowStore()
-  const { openContextMenu } = useOSStore()
+  const { openContextMenu, isMuted, volume } = useOSStore()
   const { addNotification } = useNotificationStore()
   const Icon = iconMap[id]
   const isSelected = selectedIcon === id
 
   const handleDoubleClick = () => {
+    playClickSound(isMuted, volume)
     openWindow(id)
     addNotification({
       title: 'App Opened',
