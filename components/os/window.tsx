@@ -231,7 +231,7 @@ export function Window({ id, title, children }: WindowProps) {
               : window.size.height,
         }}
         exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        transition={resizeDir ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
         drag={!isMobile && !isMaximized && !resizeDir}
         dragControls={dragControls}
         dragMomentum={false}

@@ -110,7 +110,7 @@ export const useOSStore = create<OSStore>()(
         targetId: null,
       },
 
-      setBoot: (isBooted) => set({ isBooted }),
+      setBoot: (isBooted) => set(isBooted ? { isBooted } : { isBooted, bootProgress: 0 }),
       setLogin: (isLoggedIn) => set({ isLoggedIn }),
       
       setTheme: (theme) => {
@@ -158,11 +158,12 @@ export const useOSStore = create<OSStore>()(
     }),
     {
       name: 'portfolio-os-storage',
-      partialState: (state) => ({
+      partialize: (state) => ({
         theme: state.theme,
         accentColor: state.accentColor,
         volume: state.volume,
         isMuted: state.isMuted,
+        isLoggedIn: state.isLoggedIn,
       }),
     }
   )
